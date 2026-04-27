@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "multi-api-aggregator"
+version = "0.1.0"
+description = "Async multi-API aggregator with shared rate-limit pool, priority scheduling, and adaptive throttling."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [{ name = "Shyam Sundar" }]
+dependencies = [
+    "aiohttp>=3.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "pytest-cov>=5.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["aggregator*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
