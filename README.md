@@ -96,23 +96,21 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the scheduling algorithm,
 
 ## What this demonstrates
 
-The PRD spelled out seven functional requirements. Every one is implemented, with tests proving the behaviour:
-
-| Requirement | Implementation | Test |
+| Capability | Implementation | Test |
 |---|---|---|
-| FR1: Centralized scheduling | `scheduler/scheduler.py` is the single dispatch loop | `tests/test_integration.py::test_basic_submit_returns_response` |
-| FR2: Shared global rate budget | `SharedRateLimiter` atomically acquires from global + per-API | `tests/test_shared_pool.py` |
-| FR3: Priority execution | `AgingPriorityQueue.peek_pending` picks min effective priority | `tests/test_integration.py::test_high_priority_preempts_low` |
-| FR4: Bounded fairness | Aging factor promotes waiting requests | `tests/test_integration.py::test_starvation_bound_via_aging` |
-| FR5: Adaptive behavior | `AdaptiveThrottler` AIMD on rolling error rate | `tests/test_adaptive_throttler.py` |
-| FR6: API isolation | Per-API circuit breakers + per-API buckets | `tests/test_integration.py::test_failure_isolation_across_apis` |
-| FR7: Retry integration | `RetryPolicy` re-enqueues with priority decay | `tests/test_integration.py::test_retry_promotes_through_priority_decay` |
+| Centralized scheduling | `scheduler/scheduler.py` is the single dispatch loop | `tests/test_integration.py::test_basic_submit_returns_response` |
+| Shared global rate budget | `SharedRateLimiter` atomically acquires from global + per-API | `tests/test_shared_pool.py` |
+| Priority execution | `AgingPriorityQueue.peek_pending` picks min effective priority | `tests/test_integration.py::test_high_priority_preempts_low` |
+| Bounded fairness | Aging factor promotes waiting requests | `tests/test_integration.py::test_starvation_bound_via_aging` |
+| Adaptive behavior | `AdaptiveThrottler` AIMD on rolling error rate | `tests/test_adaptive_throttler.py` |
+| API isolation | Per-API circuit breakers + per-API buckets | `tests/test_integration.py::test_failure_isolation_across_apis` |
+| Retry integration | `RetryPolicy` re-enqueues with priority decay | `tests/test_integration.py::test_retry_promotes_through_priority_decay` |
 
 Plus: in-flight **deduplication** (identical pending requests share one dispatch), **backpressure** (LOW priority dropped past threshold), **observability** (latency p50/p95/p99 per API, queue depth gauges, throughput counters).
 
-## Constraints honoured (PRD §15)
+## Design constraints
 
 - No blocking calls — fully `asyncio` + `aiohttp`
-- No per-API isolated schedulers — single central scheduler
+- Single central scheduler — no per-API isolated schedulers
 - No hardcoded limits — every threshold lives in `common/config.py`
 - Config-driven — `AggregatorConfig` + per-API `APIConfig`
